@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 const port = process.env.PORT || 5000;
 require('dotenv').config();
+var jwt = require('jsonwebtoken');
 // middleware 
 app.use(cors());
 app.use(express.json());
@@ -32,7 +33,11 @@ async function run() {
 
 
 
-        
+        app.post('/jwt', async (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, process.env.JWT_ACCESS_TOKEN, { expiresIn: 60 * 60 * 60 })
+            res.send({ token })
+        })
 
 
         app.post('/users', async (req, res) => {
