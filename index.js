@@ -29,7 +29,7 @@ async function run() {
 
 
         const usersCollection = client.db("FMMatrimony").collection("users");
-        const bioDataCollection = client.db("FMMatrimony").collection("bioData");
+        const favCollection = client.db("FMMatrimony").collection("fav");
 
 
 
@@ -38,6 +38,23 @@ async function run() {
             const token = jwt.sign(user, process.env.JWT_ACCESS_TOKEN, { expiresIn: 60 * 60 * 60 })
             res.send({ token })
         })
+
+        app.post('/favorite', async (req, res) => {
+            const favData = req.body;
+
+
+            const query = { favId: favData.favId }
+            console.log(query);
+            const existingFav = await favCollection.findOne(query);
+            if (existingFav) {
+                return res.send({ message: 'fav already exist', insertedId: null })
+            }
+
+            console.log(favData);
+            const result = await favCollection.insertOne(favData);
+            res.send(result);
+        })
+
 
 
         app.post('/users', async (req, res) => {
@@ -71,7 +88,6 @@ async function run() {
                 $set: {
 
                     biodataType: user.biodataType,
-                    bioId: user.bioId,
                     name: user.name,
                     photo: user.photo,
                     dateOfBirth: user.dateOfBirth,
