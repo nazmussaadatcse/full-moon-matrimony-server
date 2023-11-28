@@ -31,6 +31,7 @@ async function run() {
 
         const usersCollection = client.db("FMMatrimony").collection("users");
         const favCollection = client.db("FMMatrimony").collection("fav");
+        const paymentCollection = client.db("FMMatrimony").collection("payment");
 
 
 
@@ -120,6 +121,7 @@ async function run() {
             res.send(result);
         })
 
+
         app.post('/create-payment-intent', async (req, res) => {
             const { price } = req.body;
             const amount = parseInt(price * 100);
@@ -137,6 +139,20 @@ async function run() {
                 clientSecret: paymentIntent.client_secret,
             });
         });
+
+        app.post('/payments', async (req, res) => {
+            const payment = req.body;
+
+            const query = { email: payment.email }
+            const existingUser = await paymentCollection.findOne(query);
+            if (existingUser) {
+                return res.send({ message: 'payment already exist', insertedId: null })
+            }
+
+            const paymentResult = await paymentCollection.insertOne(payment);
+            res.send({paymentResult})      
+            
+          })
 
         // app.post('/bioData', async (req, res) => {
         //     const bioData = req.body;
