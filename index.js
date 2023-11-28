@@ -59,7 +59,19 @@ async function run() {
 
         app.get('/favorite', async (req, res) => {
             const result = await favCollection.find().toArray();
-            console.log(result);
+            // console.log(result);
+            res.send(result);
+        });
+
+        app.delete('/favorite/:id', async (req, res) => {
+
+            const itemId = req.params.id;
+            const userEmail = req.query.email;
+            const query = {
+                favId: itemId,
+                myEmail: userEmail
+            }
+            const result = await favCollection.deleteOne(query);
             res.send(result);
         });
 
@@ -159,12 +171,12 @@ async function run() {
             }
 
             const paymentResult = await paymentCollection.insertOne(payment);
-            res.send({paymentResult})      
-            
-          })
+            res.send({ paymentResult })
+
+        })
 
 
-          // payment and request end
+        // payment and request end
 
         // app.post('/bioData', async (req, res) => {
         //     const bioData = req.body;
