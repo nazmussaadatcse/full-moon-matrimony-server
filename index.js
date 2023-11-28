@@ -57,6 +57,12 @@ async function run() {
             res.send(result);
         })
 
+        app.get('/favorite', async (req, res) => {
+            const result = await favCollection.find().toArray();
+            console.log(result);
+            res.send(result);
+        });
+
 
 
         app.post('/users', async (req, res) => {
@@ -77,6 +83,7 @@ async function run() {
             res.send(result);
         });
 
+        // update userss 
 
         app.put('/users/:id', async (req, res) => {
             const user = req.body;
@@ -140,6 +147,8 @@ async function run() {
             });
         });
 
+        // payment and request start
+
         app.post('/payments', async (req, res) => {
             const payment = req.body;
 
@@ -153,6 +162,9 @@ async function run() {
             res.send({paymentResult})      
             
           })
+
+
+          // payment and request end
 
         // app.post('/bioData', async (req, res) => {
         //     const bioData = req.body;
