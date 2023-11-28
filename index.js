@@ -4,6 +4,7 @@ const cors = require('cors');
 const port = process.env.PORT || 5000;
 require('dotenv').config();
 var jwt = require('jsonwebtoken');
+const stripe = require('stripe')(process.env.STRIPE_SECRET)
 // middleware 
 app.use(cors());
 app.use(express.json());
@@ -83,10 +84,17 @@ async function run() {
             const query = {
                 _id: new ObjectId(id)
             }
+
+            const currentDate = new Date().toLocaleString(); // Local current date and time
+            console.log(currentDate);
+            const existingUser = await usersCollection.findOne(query);
+            // console.log(existingUser);
+
             const options = { upsert: true }
             const users = {
                 $set: {
 
+                    date: existingUser && existingUser.date ? existingUser.date : currentDate,
                     biodataType: user.biodataType,
                     name: user.name,
                     photo: user.photo,
@@ -107,10 +115,28 @@ async function run() {
                     mobileNumber: user.mobileNumber,
                 }
             }
-            console.log('::',users);
+            console.log('::', users);
             const result = await usersCollection.updateOne(query, users, options);
             res.send(result);
         })
+
+        app.post('/create-payment-intent', async (req, res) => {
+            const { price } = req.body;
+            const amount = parseInt(price * 100);
+
+            // Create a PaymentIntent with the order amount and currency
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: "bdt",
+                payment_method_types: [
+                    "card"
+                ]
+            });
+
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
+        });
 
         // app.post('/bioData', async (req, res) => {
         //     const bioData = req.body;
