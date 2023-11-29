@@ -140,6 +140,19 @@ async function run() {
             res.send(result);
         })
 
+        app.patch('/userToAdmin/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const updatedDoc = {
+              $set: {
+                role: 'admin'
+              }
+            }
+            const result = await usersCollection.updateOne(query, updatedDoc);
+            res.send(result);
+      
+          })
+
 
         app.post('/create-payment-intent', async (req, res) => {
             const { price } = req.body;
