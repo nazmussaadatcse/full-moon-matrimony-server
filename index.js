@@ -145,38 +145,58 @@ async function run() {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const updatedDoc = {
-              $set: {
-                role: 'admin'
-              }
+                $set: {
+                    role: 'admin'
+                }
             }
             const result = await usersCollection.updateOne(query, updatedDoc);
             res.send(result);
-      
-          })
+
+        })
         app.patch('/userToPremium/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const updatedDoc = {
-              $set: {
-                userType: 'premium'
-              }
+                $set: {
+                    userType: 'premium'
+                }
             }
             const result = await usersCollection.updateOne(query, updatedDoc);
             res.send(result);
-      
-          })
-          
 
-          app.post('/userToPremium', async (req, res) => {
+        })
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+
+        app.post('/userToPremium', async (req, res) => {
             const premium = req.body;
 
-            const existingUser = await premiumReqCollection.findOne({email: premium.email});
+            const existingUser = await premiumReqCollection.findOne({ email: premium.email });
             if (existingUser) {
                 return res.send({ message: 'user already requested once', insertedId: null })
             }
-            console.log('premium req:',premium);
+            console.log('premium req:', premium);
             const result = await premiumReqCollection.insertOne(premium);
-            res.send(result )
+            res.send(result)
+
+        })
+
+        app.get('/premiumReqCollection', async (req, res) => {
+            const result = await premiumReqCollection.find().toArray();
+            res.send(result);
+        });
+        app.patch('/premiumReqCollection/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const updatedDoc = {
+                $set: {
+                    userType: 'premium'
+                }
+            }
+            console.log('196 query', query);
+            const result1 = await premiumReqCollection.updateOne(query, updatedDoc);
+            const result2 = await usersCollection.updateOne(query, updatedDoc);
+            res.send({result1, result2});
 
         })
 
@@ -219,14 +239,14 @@ async function run() {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const updatedDoc = {
-              $set: {
-                status: 'approved'
-              }
+                $set: {
+                    status: 'approved'
+                }
             }
             const result = await paymentCollection.updateOne(query, updatedDoc);
             res.send(result);
-      
-          })
+
+        })
 
 
         // payment and request end
