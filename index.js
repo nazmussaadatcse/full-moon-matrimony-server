@@ -166,7 +166,19 @@ async function run() {
       
           })
           
-          
+
+          app.post('/userToPremium', async (req, res) => {
+            const premium = req.body;
+
+            const existingUser = await premiumReqCollection.findOne({email: premium.email});
+            if (existingUser) {
+                return res.send({ message: 'user already requested once', insertedId: null })
+            }
+            console.log('premium req:',premium);
+            const result = await premiumReqCollection.insertOne(premium);
+            res.send(result )
+
+        })
 
 
         app.post('/create-payment-intent', async (req, res) => {
@@ -192,12 +204,6 @@ async function run() {
         app.post('/payments', async (req, res) => {
             const payment = req.body;
 
-            // const query = { email: payment.email }
-            // const existingUser = await paymentCollection.findOne(query);
-            // if (existingUser) {
-            //     return res.send({ message: 'payment already exist', insertedId: null })
-            // }
-
             const paymentResult = await paymentCollection.insertOne(payment);
             res.send({ paymentResult })
 
@@ -208,6 +214,19 @@ async function run() {
             const result = await paymentCollection.find().toArray();
             res.send(result);
         });
+
+        app.patch('/approvedContactRequest/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const updatedDoc = {
+              $set: {
+                status: 'approved'
+              }
+            }
+            const result = await paymentCollection.updateOne(query, updatedDoc);
+            res.send(result);
+      
+          })
 
 
         // payment and request end
