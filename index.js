@@ -164,16 +164,22 @@ async function run() {
         app.post('/payments', async (req, res) => {
             const payment = req.body;
 
-            const query = { email: payment.email }
-            const existingUser = await paymentCollection.findOne(query);
-            if (existingUser) {
-                return res.send({ message: 'payment already exist', insertedId: null })
-            }
+            // const query = { email: payment.email }
+            // const existingUser = await paymentCollection.findOne(query);
+            // if (existingUser) {
+            //     return res.send({ message: 'payment already exist', insertedId: null })
+            // }
 
             const paymentResult = await paymentCollection.insertOne(payment);
             res.send({ paymentResult })
 
         })
+
+        // get payments users or requested user contact 
+        app.get('/requestedUsers', async (req, res) => {
+            const result = await paymentCollection.find().toArray();
+            res.send(result);
+        });
 
 
         // payment and request end
