@@ -235,6 +235,15 @@ async function run() {
             res.send(result);
         });
 
+        app.delete('/requestedUsers/:itemId', async (req, res) => {
+            const id = req.params.itemId;
+            const query = {
+                _id: new ObjectId(id)
+            }
+            const result = await paymentCollection.deleteOne();
+            res.send(result);
+        });
+
         app.patch('/approvedContactRequest/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
