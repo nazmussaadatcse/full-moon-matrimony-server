@@ -32,6 +32,7 @@ async function run() {
         const usersCollection = client.db("FMMatrimony").collection("users");
         const favCollection = client.db("FMMatrimony").collection("fav");
         const paymentCollection = client.db("FMMatrimony").collection("payment");
+        const premiumReqCollection = client.db("FMMatrimony").collection("premiumReq");
 
 
 
@@ -152,6 +153,20 @@ async function run() {
             res.send(result);
       
           })
+        app.patch('/userToPremium/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const updatedDoc = {
+              $set: {
+                userType: 'premium'
+              }
+            }
+            const result = await usersCollection.updateOne(query, updatedDoc);
+            res.send(result);
+      
+          })
+          
+          
 
 
         app.post('/create-payment-intent', async (req, res) => {
