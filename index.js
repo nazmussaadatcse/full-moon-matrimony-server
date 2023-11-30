@@ -33,6 +33,7 @@ async function run() {
         const favCollection = client.db("FMMatrimony").collection("fav");
         const paymentCollection = client.db("FMMatrimony").collection("payment");
         const premiumReqCollection = client.db("FMMatrimony").collection("premiumReq");
+        const successStoriesCollection = client.db("FMMatrimony").collection("successStories");
 
 
 
@@ -95,7 +96,7 @@ async function run() {
             res.send(result);
         });
 
-        app.delete('/favorite/:id', async (req, res) => {
+        app.delete('/favorite/:id', verifyToken, async (req, res) => {
 
             const itemId = req.params.id;
             const userEmail = req.query.email;
@@ -106,6 +107,19 @@ async function run() {
             const result = await favCollection.deleteOne(query);
             res.send(result);
         });
+
+        app.post('/successStories', async (req, res) => {
+            const success = req.body;
+            console.log(success);
+            const Result = await successStoriesCollection.insertOne(success);
+            res.send( Result )
+
+        })
+        app.get('/successStories', async (req, res) => {
+            const Result = await successStoriesCollection.find().toArray();
+            res.send( Result )
+
+        })
 
 
 
@@ -129,7 +143,7 @@ async function run() {
 
         // update userss 
 
-        app.put('/users/:id', async (req, res) => {
+        app.put('/users/:id', verifyToken, async (req, res) => {
             const user = req.body;
             const id = req.params.id;
             console.log(id);
@@ -184,7 +198,7 @@ async function run() {
             res.send(result);
 
         })
-        app.patch('/userToPremium/:id', async (req, res) => {
+        app.patch('/userToPremium/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const updatedDoc = {
@@ -216,7 +230,7 @@ async function run() {
             const result = await premiumReqCollection.find().toArray();
             res.send(result);
         });
-        app.patch('/premiumReqCollection/:email', async (req, res) => {
+        app.patch('/premiumReqCollection/:email', verifyToken,verifyAdmin, async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
             const updatedDoc = {
@@ -261,12 +275,12 @@ async function run() {
         })
 
         // get payments users or requested user contact 
-        app.get('/requestedUsers', async (req, res) => {
+        app.get('/requestedUsers', verifyToken, async (req, res) => {
             const result = await paymentCollection.find().toArray();
             res.send(result);
         });
 
-        app.delete('/requestedUsers/:itemId', async (req, res) => {
+        app.delete('/requestedUsers/:itemId', verifyToken, async (req, res) => {
             const id = req.params.itemId;
             const query = {
                 _id: new ObjectId(id)
@@ -275,7 +289,7 @@ async function run() {
             res.send(result);
         });
 
-        app.patch('/approvedContactRequest/:id', async (req, res) => {
+        app.patch('/approvedContactRequest/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const updatedDoc = {
@@ -288,7 +302,7 @@ async function run() {
 
         })
 
-        app.get('/user/admin/:email', async (req, res) => {
+        app.get('/user/admin/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             
             const query = { email: email };
@@ -300,18 +314,6 @@ async function run() {
             res.send({ admin });
       
           })
-
-
-        // payment and request end
-
-        // app.post('/bioData', async (req, res) => {
-        //     const bioData = req.body;
-        //     const result = await bioDataCollection.insertOne(bioData);
-        //     res.send(result);
-        // })
-
-
-
 
 
 
@@ -333,6 +335,6 @@ app.get('/', (req, res) => {
     res.send('server is running')
 })
 app.listen(port, () => {
-    console.log(`running on port ${port}`);
-    console.log(`waiting for ping...`);
+    console.log(`Full Moon Matrimony running on port ${port}`);
+    console.log(`FMM is waiting for DB ping...`);
 })
