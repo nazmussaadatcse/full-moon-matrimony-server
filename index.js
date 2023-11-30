@@ -42,6 +42,37 @@ async function run() {
             res.send({ token })
         })
 
+        const verifyToken = (req, res, next) => {
+
+            console.log('inside verify token: ', req.headers.authorization);
+      
+            if (!req.headers.authorization) {
+              return res.status(401).send({ message: 'forbidden access' })
+            }
+            const token = req.headers.authorization.split(' ')[1];
+      
+            jwt.verify(token, process.env.JWT_ACCESS_TOKEN, (error, decoded) => {
+              if (error) {
+                return res.status(401).send({ message: 'forbidden access' })
+              }
+              req.decoded = decoded;
+              next();
+            })
+          }
+
+          const verifyAdmin = async (req, res, next) => {
+            const email = req.decoded.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            const isAdmin = user?.role === 'admin';
+            if (!isAdmin) {
+              return res.status(401).send({ message: 'forbidden access' })
+            }
+            next();
+          }
+
+
+
         app.post('/favorite', async (req, res) => {
             const favData = req.body;
 
@@ -141,7 +172,7 @@ async function run() {
             res.send(result);
         })
 
-        app.patch('/userToAdmin/:id', async (req, res) => {
+        app.patch('/userToAdmin/:id',verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const updatedDoc = {
@@ -256,6 +287,19 @@ async function run() {
             res.send(result);
 
         })
+
+        app.get('/user/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            let admin = false;
+            if (user) {
+              admin = user?.role === 'admin';
+            }
+            res.send({ admin });
+      
+          })
 
 
         // payment and request end
