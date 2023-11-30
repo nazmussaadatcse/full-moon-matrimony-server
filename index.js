@@ -46,31 +46,31 @@ async function run() {
         const verifyToken = (req, res, next) => {
 
             console.log('inside verify token: ', req.headers.authorization);
-      
+
             if (!req.headers.authorization) {
-              return res.status(401).send({ message: 'forbidden access' })
+                return res.status(401).send({ message: 'forbidden access' })
             }
             const token = req.headers.authorization.split(' ')[1];
-      
-            jwt.verify(token, process.env.JWT_ACCESS_TOKEN, (error, decoded) => {
-              if (error) {
-                return res.status(401).send({ message: 'forbidden access' })
-              }
-              req.decoded = decoded;
-              next();
-            })
-          }
 
-          const verifyAdmin = async (req, res, next) => {
+            jwt.verify(token, process.env.JWT_ACCESS_TOKEN, (error, decoded) => {
+                if (error) {
+                    return res.status(401).send({ message: 'forbidden access' })
+                }
+                req.decoded = decoded;
+                next();
+            })
+        }
+
+        const verifyAdmin = async (req, res, next) => {
             const email = req.decoded.email;
             const query = { email: email };
             const user = await usersCollection.findOne(query);
             const isAdmin = user?.role === 'admin';
             if (!isAdmin) {
-              return res.status(401).send({ message: 'forbidden access' })
+                return res.status(401).send({ message: 'forbidden access' })
             }
             next();
-          }
+        }
 
 
 
@@ -112,12 +112,21 @@ async function run() {
             const success = req.body;
             console.log(success);
             const Result = await successStoriesCollection.insertOne(success);
-            res.send( Result )
+            res.send(Result)
 
         })
         app.get('/successStories', async (req, res) => {
             const Result = await successStoriesCollection.find().toArray();
-            res.send( Result )
+            res.send(Result)
+
+        })
+
+        app.delete('/successStories/:id', verifyToken, verifyAdmin, async (req, res) => {
+            
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const Result = await successStoriesCollection.deleteOne(query);
+            res.send(Result)
 
         })
 
@@ -186,7 +195,7 @@ async function run() {
             res.send(result);
         })
 
-        app.patch('/userToAdmin/:id',verifyToken, verifyAdmin, async (req, res) => {
+        app.patch('/userToAdmin/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const updatedDoc = {
@@ -230,7 +239,7 @@ async function run() {
             const result = await premiumReqCollection.find().toArray();
             res.send(result);
         });
-        app.patch('/premiumReqCollection/:email', verifyToken,verifyAdmin, async (req, res) => {
+        app.patch('/premiumReqCollection/:email', verifyToken, verifyAdmin, async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
             const updatedDoc = {
@@ -241,7 +250,7 @@ async function run() {
             console.log('196 query', query);
             const result1 = await premiumReqCollection.updateOne(query, updatedDoc);
             const result2 = await usersCollection.updateOne(query, updatedDoc);
-            res.send({result1, result2});
+            res.send({ result1, result2 });
 
         })
 
@@ -304,16 +313,16 @@ async function run() {
 
         app.get('/user/admin/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
-            
+
             const query = { email: email };
             const user = await usersCollection.findOne(query);
             let admin = false;
             if (user) {
-              admin = user?.role === 'admin';
+                admin = user?.role === 'admin';
             }
             res.send({ admin });
-      
-          })
+
+        })
 
 
 
