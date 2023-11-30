@@ -39,7 +39,7 @@ async function run() {
 
         app.post('/jwt', async (req, res) => {
             const user = req.body;
-            const token = jwt.sign(user, process.env.JWT_ACCESS_TOKEN, { expiresIn: 60 * 60 * 60 })
+            const token = jwt.sign(user, process.env.JWT_ACCESS_TOKEN, { expiresIn: 60 * 60 })
             res.send({ token })
         })
 
@@ -122,7 +122,7 @@ async function run() {
         })
 
         app.delete('/successStories/:id', verifyToken, verifyAdmin, async (req, res) => {
-            
+
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const Result = await successStoriesCollection.deleteOne(query);
@@ -284,7 +284,7 @@ async function run() {
         })
 
         // get payments users or requested user contact 
-        app.get('/requestedUsers', verifyToken, async (req, res) => {
+        app.get('/requestedUsers', async (req, res) => {
             const result = await paymentCollection.find().toArray();
             res.send(result);
         });
@@ -329,8 +329,8 @@ async function run() {
 
 
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        // await client.db("admin").command({ ping: 1 });
+        // console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
